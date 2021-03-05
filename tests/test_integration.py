@@ -22,7 +22,7 @@ def test_integration():
         # UUID to avoid collisions on parallel test runs
         path=f'test/test-{uuid.uuid4()}.sqlite')
     engine = SQLiteEngine()
-    with db_context(storage=storage, engine=engine,
+    with db_context(storage, engine,
                     commit_message='New table and some data') as manager:
         connection = sqlite3.connect(manager.local_path())
         cursor = connection.cursor()
@@ -38,7 +38,7 @@ def test_integration():
 
     # Without the context manager, and a bit more control over the
     # flow (e.g., you can commit more than once)
-    manager = DBManager(storage=storage, engine=engine)
+    manager = DBManager(storage, engine)
 
     connection = sqlite3.connect(manager.local_path())
     cursor = connection.cursor()
@@ -70,4 +70,4 @@ def test_integration():
     # updated.
 
     # You probably never want to do this, but it's good for integration tests
-    storage.delete(commit_message='Got rid of the DB')
+    manager.delete_remote('Got rid of the DB')
