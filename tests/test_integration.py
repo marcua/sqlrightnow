@@ -14,13 +14,16 @@ from sqlrightnow.persistence import GitStorage
 def test_integration():
     """An end-to-end test of `sqlrightnow`."""
     # With a helpful context manager
-    # We want to support other storage engines as well, e.g., 
+
+    # We want to support other storage engines as well, e.g.,
     # S3Storage(bucket='xyz', key='/test/test.sqlite')
     storage = GitStorage(
         bucket='https://github.com/marcua/sqlrightnow-test',
-        path=f'test/test-{uuid.uuid4()}.sqlite')  # UUID to avoid collisions on parallel test runs
+        # UUID to avoid collisions on parallel test runs
+        path=f'test/test-{uuid.uuid4()}.sqlite')
     engine = SQLiteEngine()
-    with db_context(storage=storage, engine=engine, commit_message='New table and some data') as manager:
+    with db_context(storage=storage, engine=engine,
+                    commit_message='New table and some data') as manager:
         connection = sqlite3.connect(manager.local_path())
         cursor = connection.cursor()
         cursor.execute('CREATE TABLE IF NOT EXISTS test_table ('
@@ -33,7 +36,8 @@ def test_integration():
         connection.close()
         manager.commit('Created a table and added some data')
 
-    # Without the context manager, and a bit more control over the flow (e.g., you can commit more than once)
+    # Without the context manager, and a bit more control over the
+    # flow (e.g., you can commit more than once)
     manager = DBManager(storage=storage, engine=engine)
 
     connection = sqlite3.connect(manager.local_path())
